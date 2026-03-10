@@ -1,0 +1,28 @@
+import request from '@/utils/request'
+
+//发表评论
+export const addcomment = (obj: object) => request.post('/api/addComment', obj)
+
+//回复评论
+export const replycomment = (obj: object) =>
+  request.post('/api/readdComment', obj)
+
+//ai问答
+export const getPoemRelated = (promt: string, content: string) =>
+  request.get('/api/getPoemRelated', {
+    params: {
+      content,
+      promt
+    }
+  })
+
+//ai创作提交作品
+export const postPoem = (obj: object) => request.post('/api/postPoem', obj)
+
+//获取ai生成灵感
+export const aicrete = (prompt: string) =>
+  request.get('/api/aicrete', {
+    params: {
+      prompt
+    }
+  })

@@ -1,0 +1,12 @@
+# 通用部分
+.DS_Store
+Thumbs.db
+*.log
+
+# 前端部分
+node_modules/
+dist/
+build/
+.cache/
+.angular/
+.nuxt/

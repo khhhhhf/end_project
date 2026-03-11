@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise');
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: '123456', // 请替换为你的数据库密码
+  password: '12345678', // 请替换为你的数据库密码
   database: 'qw',
   connectionLimit: 10,      // 最大连接数
   waitForConnections: true, // 无空闲连接时排队等待

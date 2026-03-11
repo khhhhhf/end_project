@@ -1,15 +1,350 @@
 <template>
   <div class="class-index-container">
-    <h2>分类</h2>
-    <p>分类ID: {{ route.params.them_id }}</p>
+
+    <!-- 分类横幅 -->
+    <div class="theme-banner" v-if="themeInfo">
+      <img :src="baseURL + themeInfo.theme_image" class="banner-img" :alt="themeInfo.theme_name" />
+      <div class="banner-overlay">
+        <h1 class="banner-title">{{ themeInfo.theme_name }}</h1>
+        <p class="banner-desc">{{ themeInfo.theme_description }}</p>
+      </div>
+    </div>
+
+    <!-- 经典收录 -->
+    <CardItem title="经典收录">
+      <div v-if="classicPoems.length === 0 && !classicLoading" class="empty-tip">
+        暂无经典收录
+      </div>
+      <div class="classic-grid" v-loading="classicLoading">
+        <div
+          class="classic-card"
+          v-for="poem in classicPoems"
+          :key="poem.poem_id"
+          @click="goToPoem(poem.poem_id)"
+        >
+          <div class="classic-card-inner">
+            <div class="poem-author">{{ poem.author }}</div>
+            <h3 class="poem-title">{{ poem.title }}</h3>
+            <p class="poem-content">{{ poem.content }}</p>
+          </div>
+        </div>
+      </div>
+    </CardItem>
+
+    <!-- 用户创作 -->
+    <CardItem title="用户创作">
+      <div v-if="userPoems.length === 0 && !userLoading" class="empty-tip">
+        暂无用户创作
+      </div>
+      <div class="user-grid" v-loading="userLoading">
+        <div
+          class="user-card"
+          v-for="poem in userPoems"
+          :key="poem.poem_id"
+          @click="goToPoem(poem.poem_id)"
+        >
+          <div class="user-card-meta">
+            <span class="user-nickname">{{ poem.nickname }}</span>
+            <span class="user-date">{{ formatDate(poem.created_at) }}</span>
+          </div>
+          <h3 class="user-poem-title">{{ poem.title }}</h3>
+          <p class="user-poem-content">{{ poem.content }}</p>
+          <div class="user-card-footer">
+            <span class="stat-item">
+              <el-icon><i-ep-Star /></el-icon>
+              {{ poem.likes_count }}
+            </span>
+            <span class="stat-item">
+              <el-icon><i-ep-ChatDotRound /></el-icon>
+              {{ poem.comment_count }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="pagination-block">
+        <el-pagination
+          v-model:current-page="page.currentPage4"
+          v-model:page-size="page.pageSize4"
+          :page-sizes="[8, 12, 16]"
+          :background="true"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="totalCount"
+          @size-change="fetchUserPoems"
+          @current-change="fetchUserPoems"
+        />
+      </div>
+    </CardItem>
+
   </div>
 </template>
+
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getarticleclass, getPoems, getpoemsall } from '@/api/articleclass'
+import { baseURL } from '@/utils/request'
+import type { Theme, create } from '@/types'
+
+interface ClassicPoem {
+  poem_id: number
+  title: string
+  content: string
+  author: string
+}
+
 const route = useRoute()
+const router = useRouter()
+
+const themeInfo = ref<Theme | null>(null)
+const classicPoems = ref<ClassicPoem[]>([])
+const userPoems = ref<create[]>([])
+const classicLoading = ref(false)
+const userLoading = ref(false)
+const totalCount = ref(0)
+
+const page = ref({
+  currentPage4: 1,
+  pageSize4: 8,
+  theme_id: 0
+})
+
+function getThemeId() {
+  return Number(route.params.them_id)
+}
+
+async function fetchThemeInfo() {
+  const res = await getarticleclass()
+  const list: Theme[] = res.data.msg
+  themeInfo.value = list.find(t => t.theme_id === getThemeId()) ?? null
+}
+
+async function fetchClassicPoems() {
+  classicLoading.value = true
+  try {
+    const res = await getPoems(getThemeId())
+    classicPoems.value = res.data.msg ?? []
+  } catch {
+    classicPoems.value = []
+  } finally {
+    classicLoading.value = false
+  }
+}
+
+async function fetchUserPoems() {
+  userLoading.value = true
+  page.value.theme_id = getThemeId()
+  try {
+    const res = await getpoemsall(page.value)
+    userPoems.value = res.data.msg.list ?? []
+    totalCount.value = res.data.msg.pagination.totalCount ?? 0
+  } catch {
+    userPoems.value = []
+  } finally {
+    userLoading.value = false
+  }
+}
+
+function goToPoem(poem_id: number) {
+  router.push({ name: 'ArticleIndex', params: { poem_id } })
+}
+
+function formatDate(dateStr: string) {
+  return dateStr ? dateStr.slice(0, 10) : ''
+}
+
+onMounted(async () => {
+  await fetchThemeInfo()
+  await fetchClassicPoems()
+  await fetchUserPoems()
+})
+
+watch(() => route.params.them_id, async () => {
+  page.value.currentPage4 = 1
+  await fetchThemeInfo()
+  await fetchClassicPoems()
+  await fetchUserPoems()
+})
 </script>
+
 <style lang="less" scoped>
 .class-index-container {
+  padding-bottom: 40px;
+}
+
+/* 横幅 */
+.theme-banner {
+  position: relative;
+  height: 220px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+
+  .banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 40px;
+
+    .banner-title {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 0 0 10px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .banner-desc {
+      color: rgba(255,255,255,0.88);
+      font-size: 15px;
+      margin: 0;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+  }
+}
+
+/* 经典收录网格 */
+.classic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.classic-card {
+  background: linear-gradient(145deg, #f8f4ff, #f0eaff);
+  border: 1px solid #e0d4f7;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(138, 43, 226, 0.15);
+  }
+
+  .classic-card-inner {
+    padding: 20px;
+
+    .poem-author {
+      font-size: 12px;
+      color: #8a2be2;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .poem-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin: 0 0 12px;
+    }
+
+    .poem-content {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+}
+
+/* 用户创作网格 */
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.user-card {
+  background: #fff;
+  border: 1px solid #e8e0f0;
+  border-radius: 14px;
   padding: 20px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(138, 43, 226, 0.12);
+  }
+
+  .user-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .user-nickname {
+      font-size: 13px;
+      color: #8a2be2;
+      font-weight: 500;
+    }
+
+    .user-date {
+      font-size: 12px;
+      color: #aaa;
+    }
+  }
+
+  .user-poem-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 10px;
+  }
+
+  .user-poem-content {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.8;
+    margin: 0 0 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .user-card-footer {
+    display: flex;
+    gap: 16px;
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      color: #999;
+
+      .el-icon {
+        color: #8a2be2;
+      }
+    }
+  }
+}
+
+.empty-tip {
+  text-align: center;
+  color: #aaa;
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+.pagination-block {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

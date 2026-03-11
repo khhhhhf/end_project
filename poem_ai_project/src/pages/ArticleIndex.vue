@@ -34,6 +34,20 @@
                   {{ line }}
                 </p>
               </div>
+
+              <div class="poetry-actions">
+                <button
+                  class="like-btn"
+                  :class="{ liked: isLiked }"
+                  @click="handleLike"
+                  :disabled="likeLoading"
+                >
+                  <el-icon>
+                    <i-ep-StarFilled v-if="isLiked" /><i-ep-Star v-else
+                  /></el-icon>
+                  <span>{{ likesCount }}</span>
+                </button>
+              </div>
             </div>
           </section>
 
@@ -129,14 +143,37 @@
 
 <script setup lang="ts">
 import { getPoemp, poemdetai } from '@/api/articleclass'
-import { addcomment, getPoemRelated, replycomment } from '@/api/articledetail'
+import {
+  addcomment,
+  getPoemRelated,
+  replycomment,
+  toggleLike
+} from '@/api/articledetail'
 import type { Comment, NewComment, Poem } from '@/types'
 import { splitPoemIntoArray } from '@/utils/format'
 import { ref, nextTick } from 'vue'
+import { useUserStore } from '@/stores'
 
 const props = defineProps<{
   poem_id: string
 }>()
+
+const userStore = useUserStore()
+const isLiked = ref(false)
+const likesCount = ref(0)
+const likeLoading = ref(false)
+
+async function handleLike() {
+  if (likeLoading.value) return
+  likeLoading.value = true
+  try {
+    await toggleLike(userStore.userinfo.user_id, props.poem_id)
+    isLiked.value = !isLiked.value
+    likesCount.value += isLiked.value ? 1 : -1
+  } finally {
+    likeLoading.value = false
+  }
+}
 
 // 聊天消息类型
 interface ChatMessage {
@@ -183,8 +220,7 @@ function classifyComments(comments?: readonly Comment[]): NewComment[] {
 
 //渲染当前页面
 async function renderdetail() {
-  //获取诗篇相关
-  const res = await poemdetai(8, props.poem_id)
+  const res = await poemdetai(userStore.userinfo.user_id, props.poem_id)
   desc.value =
     '这首歌的题目是' +
     res.data.msg[0].title +
@@ -192,6 +228,8 @@ async function renderdetail() {
     res.data.msg[0].content
   res.data.msg[0].content = splitPoemIntoArray(res.data.msg[0].content)
   poem.value = res.data.msg[0]
+  likesCount.value = res.data.msg[0].likes_count ?? 0
+  isLiked.value = !!res.data.msg[0].is_liked
 }
 renderdetail()
 
@@ -319,7 +357,7 @@ async function docomment() {
 
 <style scoped lang="less">
 .poetry-app {
-  background: url(../assets/1.jpg) no-repeat center center;
+  background: url(../assets/1.png) no-repeat center center;
   background-size: cover;
   min-height: 100vh;
   display: flex;
@@ -414,6 +452,59 @@ async function docomment() {
 
 .poetry-line:hover {
   transform: translateX(5px);
+}
+
+/* 点赞按钮 */
+.poetry-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  border-top: 1px dashed #e1bee7;
+}
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border-radius: 50px;
+  border: 2px solid #e1bee7;
+  background: #fff;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  .el-icon {
+    font-size: 20px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    border-color: #8a2be2;
+    color: #8a2be2;
+    background: #f9f4ff;
+
+    .el-icon {
+      transform: scale(1.2);
+    }
+  }
+
+  &.liked {
+    border-color: #8a2be2;
+    background: linear-gradient(135deg, #8a2be2, #a855f7);
+    color: #fff;
+
+    &:hover {
+      background: linear-gradient(135deg, #7a1fd2, #9340e8);
+      color: #fff;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 /* AI 聊天框 */

@@ -107,10 +107,12 @@ async function toggleLike(req, res) {
     if (checkRows.length > 0) {
       // 已点赞，执行取消点赞操作
       await pool.execute('DELETE FROM likes WHERE user_id = ? AND poem_id = ?', [user_id, poem_id]);
+      await pool.execute('UPDATE poems SET likes_count = GREATEST(likes_count - 1, 0) WHERE poem_id = ?', [poem_id]);
       return res.cc('取消点赞成功', 0);
     } else {
       // 未点赞，执行点赞操作
       const [result] = await pool.execute('INSERT INTO likes (user_id, poem_id) VALUES (?, ?)', [user_id, poem_id]);
+      await pool.execute('UPDATE poems SET likes_count = likes_count + 1 WHERE poem_id = ?', [poem_id]);
       return res.cc({
         message: '点赞成功',
         like_id: result.insertId

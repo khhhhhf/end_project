@@ -1,5 +1,9 @@
 import request from '@/utils/request'
 
+//点赞/取消点赞
+export const toggleLike = (user_id: number, poem_id: string | number) =>
+  request.post('/api/toggleLike', { user_id, poem_id })
+
 //发表评论
 export const addcomment = (obj: object) => request.post('/api/addComment', obj)
 

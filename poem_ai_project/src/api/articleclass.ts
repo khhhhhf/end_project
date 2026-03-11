@@ -29,6 +29,12 @@ export const getPoemp = (poem_id: string) =>
     }
   })
 
+//获取某分类下管理员收录诗篇
+export const getPoems = (theme_id: number) =>
+  request.get('/api/getPoems', {
+    params: { theme_id }
+  })
+
 //获取诗篇分页创作
 export const getpoemsall = (obj: object) =>
   request.get('/api/getpoemsall', {

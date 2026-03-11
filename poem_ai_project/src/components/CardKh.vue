@@ -15,7 +15,7 @@
 // import { ref,reactive } from 'vue';
 import type { create, Theme } from '@/types'
 import { baseURL } from '@/utils/request'
-import imgsrc from '@/assets/bj.jpg'
+import imgsrc from '@/assets/bj.png'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 const imgg = computed(() => {
@@ -52,11 +52,22 @@ function tz() {
 <style lang="less" scoped>
 .card {
   margin-top: 20px;
+  cursor: pointer;
+
   .el-card {
     border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
     :deep(.el-card__body) {
       padding: 0px;
     }
+
     .bottom {
       height: 120px;
       padding: 20px;
@@ -66,9 +77,12 @@ function tz() {
       }
     }
   }
+
   img {
     width: 100%;
     height: 180px;
+    object-fit: cover;
+    display: block;
   }
 }
 </style>

@@ -85,11 +85,13 @@
 
       <!-- 主要内容区域 -->
       <el-main>
-        <router-view v-slot="{ Component }">
-          <transition name="slide" mode="out-in">
-            <component :is="Component" />
-          </transition>
-        </router-view>
+        <div class="main-wrapper">
+          <router-view v-slot="{ Component }">
+            <transition name="slide" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -327,6 +329,12 @@ onUnmounted(() => window.removeEventListener('resize', handleResize))
   overflow-y: auto;
 }
 
+.main-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
 .slide-enter-active,
 .slide-leave-active {
   transition: all 0.3s ease;
@@ -342,3 +350,4 @@ onUnmounted(() => window.removeEventListener('resize', handleResize))
   transform: translateX(-30px);
 }
 </style>
+

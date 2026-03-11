@@ -73,7 +73,7 @@
 import { reactive, ref, watch } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
-import imgsrc from '@/assets/1.jpg'
+import imgsrc from '@/assets/1.png'
 import { login, register } from '@/api/user'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'

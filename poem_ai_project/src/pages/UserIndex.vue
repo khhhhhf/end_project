@@ -74,6 +74,10 @@
                 <span>{{ userStore.userinfo.user_id }}</span>
               </div>
               <div class="info-item">
+                <label>昵称</label>
+                <span>{{ editForm.username || userStore.userinfo.username }}</span>
+              </div>
+              <div class="info-item">
                 <label>个人简介</label>
                 <span>{{
                   userInfo.bio || '这个人很懒，什么都没有留下...'
@@ -370,16 +374,20 @@ const handleSaveUserInfo = async () => {
     if (valid) {
       saveLoading.value = true
       try {
-        // TODO: 调用更新用户信息的API
-        // await updateUserInfo(editForm)
+        const formData = new FormData()
+        formData.append('user_id', userStore.userinfo.user_id.toString())
+        formData.append('nickname', editForm.username)
+        formData.append('user_description', editForm.bio)
 
-        // 更新本地存储的用户信息
-        userStore.userinfo.username = editForm.username
-        userInfo.bio = editForm.bio
-        userInfo.preference = editForm.preference
-
-        ElMessage.success('保存成功')
-        showEditDialog.value = false
+        const res = await updateUserInfo(formData)
+        if (res.data.code === 0) {
+          userInfo.bio = editForm.bio
+          userInfo.preference = editForm.preference
+          ElMessage.success('保存成功')
+          showEditDialog.value = false
+        } else {
+          ElMessage.error(res.data.msg || '保存失败')
+        }
       } catch {
         ElMessage.error('保存失败，请重试')
       } finally {
@@ -493,12 +501,13 @@ const loadUserStats = async () => {
 
 const loadUserInfo = async () => {
   try {
-    // TODO: 调用获取用户详细信息的API
-    // const res = await getUserDetail()
-    // Object.assign(userInfo, res.data)
-
+    const res = await renderProfile(userStore.userinfo.user_id)
+    if (res.data.code === 0) {
+      userInfo.bio = res.data.msg.user_description || ''
+      userInfo.preference = userInfo.preference || '古典诗词'
+    }
     // 初始化编辑表单
-    editForm.username = userStore.userinfo.username
+    editForm.username = res.data.msg.nickname || userStore.userinfo.username
     editForm.bio = userInfo.bio
     editForm.preference = userInfo.preference
     editForm.avatarUrl = userAvatarUrl.value

@@ -1,19 +1,38 @@
 # 项目启动文档
 
+> 诗歌创作与社区应用：前端 Vue3 + Vite + Element Plus，后端 Node.js + Express，数据库 MySQL，AI 接入 Kimi（Moonshot）。
+
 ## 一、环境要求
 
-- Node.js >= 16
+- Node.js >= 20.19（前端要求，推荐 22 LTS）
 - MySQL >= 8.0
 - pnpm（前端）/ npm（后端）
 
 ---
 
-## 二、数据库初始化
+## 二、目录结构
+
+- `poem_ai_project/`：前端项目
+- `spapi-sever/`：后端项目
+- `spapi-sever/uploads/`：图片上传与主题封面（示例数据会引用）
+- `redme.md`：启动与初始化说明
+
+---
+
+## 三、快速开始（推荐顺序）
+
+1. 初始化数据库（见下文）
+2. 启动后端
+3. 启动前端
+
+---
+
+## 四、数据库初始化
 
 ### 1. 登录 MySQL
 
 ```bash
-mysql -u root -p12345678
+mysql -u root -p
 ```
 
 ### 2. 创建数据库
@@ -144,7 +163,7 @@ INSERT INTO comments (poem_id, user_id, content, parent_comment_id, created_at) 
 (14, 3, '野火烧不尽，最喜欢这两句，充满生命力',        NULL, '2024-04-04 10:00:00'),
 (16, 2, '苏轼这首词写得太美了，每逢中秋必读',          NULL, '2024-04-05 20:00:00'),
 (16, 1, '但愿人长久，千里共婵娟，千古绝唱',            NULL, '2024-04-05 20:30:00'),
-(16, 4, '豪放派词人的代表作，无与伦比',                10,   '2024-04-05 21:00:00');
+ (16, 4, '豪放派词人的代表作，无与伦比',                10,   '2024-04-05 21:00:00');
 ```
 
 退出 MySQL：
@@ -155,43 +174,9 @@ exit
 
 ---
 
-## 三、启动后端
+## 五、后端配置
 
-```bash
-cd spapi-sever
-npm install
-node app.js
-```
-
-后端运行在 `http://localhost:3000`
-
----
-
-## 四、启动前端
-
-```bash
-cd poem_ai_project
-pnpm install
-pnpm dev
-```
-
-前端运行在 `http://localhost:5173`
-
----
-
-## 五、测试账号
-
-| 用户名 | 密码 |
-|--------|------|
-| li_bai | 123456 |
-| du_fu | 123456 |
-| wang_wei | 123456 |
-| bai_juyi | 123456 |
-| su_shi | 123456 |
-
----
-
-## 六、数据库配置
+### 1. 数据库连接
 
 文件路径：`spapi-sever/db/index.js`
 
@@ -203,3 +188,45 @@ const pool = mysql.createPool({
   database: 'qw',
 })
 ```
+
+### 2. AI Key 配置（Kimi / Moonshot）
+
+文件路径：`spapi-sever/api/kimiapi.js`
+
+将 `apiKey` 替换为你自己的 Key。注意：生产环境不要硬编码密钥。
+
+---
+
+## 六、启动后端
+
+```bash
+cd spapi-sever
+npm install
+node app.js
+```
+
+后端运行在 `http://localhost:3000`
+
+---
+
+## 七、启动前端
+
+```bash
+cd poem_ai_project
+pnpm install
+pnpm dev
+```
+
+前端运行在 `http://localhost:5173`
+
+---
+
+## 八、测试账号
+
+| 用户名 | 密码 |
+|--------|------|
+| li_bai | 123456 |
+| du_fu | 123456 |
+| wang_wei | 123456 |
+| bai_juyi | 123456 |
+| su_shi | 123456 |

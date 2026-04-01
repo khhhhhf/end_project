@@ -5,6 +5,7 @@ import FlyingFlowerGame from '@/pages/home/FlyingFlowerGame.vue'
 import HomeIndex from '@/pages/home/HomeIndex.vue'
 import RankingList from '@/pages/home/RankingList.vue'
 import UserIndex from '@/pages/UserIndex.vue'
+import AdminIndex from '@/pages/AdminIndex.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores'
 
@@ -57,6 +58,11 @@ const router = createRouter({
           name: 'RankingList',
           path: 'ranking',
           component: RankingList
+        },
+        {
+          name: 'AdminIndex',
+          path: 'admin',
+          component: AdminIndex
         }
       ]
     },
@@ -82,6 +88,9 @@ router.beforeEach((to, from, next) => {
   if (to.name !== 'Login' && !isAuthenticated) {
     ElMessage.error('请先完成登录')
     next({ name: 'Login' })
+  } else if (to.name === 'AdminIndex' && userstore.userinfo.role !== 'admin') {
+    ElMessage.error('权限不足，无法进入后台')
+    next({ name: 'HomeIndex' })
   } else next()
 })
 

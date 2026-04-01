@@ -406,8 +406,46 @@ async function getPoemRelated(req, res) {
   return res.cc(aa, 0);
 }
 
+// 管理员：获取所有用户创作的诗篇（待审核/管理）
+async function getAllUserPoems(req, res) {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT p.*, u.username, u.nickname 
+      FROM poems p 
+      JOIN users u ON p.user_id = u.user_id 
+      WHERE p.user_id IS NOT NULL 
+      ORDER BY p.created_at DESC
+    `);
+    res.cc(rows, 0);
+  } catch (error) {
+    res.cc('获取用户诗篇失败', 1);
+  }
+}
 
+// 管理员：删除违规诗篇
+async function deletePoem(req, res) {
+  const { poem_id } = req.body;
+  try {
+    await pool.execute('DELETE FROM poems WHERE poem_id = ?', [poem_id]);
+    res.cc('删除成功', 0);
+  } catch (error) {
+    res.cc('删除失败', 1);
+  }
+}
 
+// 管理员：发布经典诗歌（user_id 为 NULL）
+async function postClassicPoem(req, res) {
+  const { title, content, author, theme_id } = req.body;
+  try {
+    await pool.execute(
+      'INSERT INTO poems (user_id, title, content, author, theme_id) VALUES (NULL, ?, ?, ?, ?)',
+      [title, content, author, theme_id]
+    );
+    res.cc('发布经典诗歌成功', 0);
+  } catch (error) {
+    res.cc('发布失败', 1);
+  }
+}
 
 module.exports = {
   aicrete,
@@ -422,5 +460,8 @@ module.exports = {
   getPoempl,
   addComment,
   readdComment,
-  getPoemRelated
+  getPoemRelated,
+  getAllUserPoems,
+  deletePoem,
+  postClassicPoem
 };

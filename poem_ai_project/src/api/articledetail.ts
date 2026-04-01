@@ -30,3 +30,14 @@ export const aicrete = (prompt: string) =>
       prompt
     }
   })
+
+// 管理员：获取所有用户诗篇
+export const getAllUserPoems = () => request.get('/api/getAllUserPoems')
+
+// 管理员：删除诗篇
+export const deletePoem = (poem_id: number) =>
+  request.post('/api/deletePoem', { poem_id })
+
+// 管理员：发布经典诗歌
+export const postClassicPoem = (obj: object) =>
+  request.post('/api/postClassicPoem', obj)

@@ -62,6 +62,13 @@
               <router-link replace to="/home-index/ranking" class="nav-item"
                 >创作排行榜</router-link
               >
+              <router-link
+                v-if="(usestore.userinfo as any).role === 'admin'"
+                replace
+                to="/home-index/admin"
+                class="nav-item admin-nav"
+                >后台管理</router-link
+              >
             </div>
 
             <!-- 用户头像 -->
@@ -318,6 +325,19 @@ onUnmounted(() => window.removeEventListener('resize', handleResize))
       width: 100%;
       height: 2px;
       background-color: #8a2be2;
+    }
+  }
+}
+
+.admin-nav {
+  color: #e6a23c !important;
+  &:hover {
+    color: #cf9236 !important;
+  }
+  &.router-link-active {
+    color: #e6a23c !important;
+    &:after {
+      background-color: #e6a23c !important;
     }
   }
 }

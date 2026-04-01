@@ -49,17 +49,21 @@ async function login(req, res) {
       return res.cc('用户名或密码错误');
     }
     const user = rows[0];
+    console.log('Login attempt for user:', username);
+    console.log('Stored hash:', user.password_hash);
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    console.log('Password valid:', isPasswordValid);
     if (!isPasswordValid) {
       return res.cc('用户名或密码错误');
     }
     // 生成 JWT 令牌
-    const token = jwt.sign({ user_id: user.user_id }, secretKey, { expiresIn: '1h' });
+    const token = jwt.sign({ user_id: user.user_id, role: user.role }, secretKey, { expiresIn: '1h' });
     const obj = {
       token,
       username,
       user_id: user.user_id,
-      avatar_url: user.avatar_url
+      avatar_url: user.avatar_url,
+      role: user.role
     }
     return res.cc(obj, 0);
   } catch (error) {

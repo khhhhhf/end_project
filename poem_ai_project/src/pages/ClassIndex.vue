@@ -30,51 +30,6 @@
         </div>
       </div>
     </CardItem>
-
-    <!-- 用户创作 -->
-    <CardItem title="用户创作">
-      <div v-if="userPoems.length === 0 && !userLoading" class="empty-tip">
-        暂无用户创作
-      </div>
-      <div class="user-grid" v-loading="userLoading">
-        <div
-          class="user-card"
-          v-for="poem in userPoems"
-          :key="poem.poem_id"
-          @click="goToPoem(poem.poem_id)"
-        >
-          <div class="user-card-meta">
-            <span class="user-nickname">{{ poem.nickname }}</span>
-            <span class="user-date">{{ formatDate(poem.created_at) }}</span>
-          </div>
-          <h3 class="user-poem-title">{{ poem.title }}</h3>
-          <p class="user-poem-content">{{ poem.content }}</p>
-          <div class="user-card-footer">
-            <span class="stat-item">
-              <el-icon><i-ep-Star /></el-icon>
-              {{ poem.likes_count }}
-            </span>
-            <span class="stat-item">
-              <el-icon><i-ep-ChatDotRound /></el-icon>
-              {{ poem.comment_count }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="pagination-block">
-        <el-pagination
-          v-model:current-page="page.currentPage4"
-          v-model:page-size="page.pageSize4"
-          :page-sizes="[8, 12, 16]"
-          :background="true"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="totalCount"
-          @size-change="fetchUserPoems"
-          @current-change="fetchUserPoems"
-        />
-      </div>
-    </CardItem>
-
   </div>
 </template>
 
@@ -97,16 +52,7 @@ const router = useRouter()
 
 const themeInfo = ref<Theme | null>(null)
 const classicPoems = ref<ClassicPoem[]>([])
-const userPoems = ref<create[]>([])
 const classicLoading = ref(false)
-const userLoading = ref(false)
-const totalCount = ref(0)
-
-const page = ref({
-  currentPage4: 1,
-  pageSize4: 8,
-  theme_id: 0
-})
 
 function getThemeId() {
   return Number(route.params.them_id)
@@ -115,7 +61,7 @@ function getThemeId() {
 async function fetchThemeInfo() {
   const res = await getarticleclass()
   const list: Theme[] = res.data.msg
-  themeInfo.value = list.find(t => t.theme_id === getThemeId()) ?? null
+  themeInfo.value = list.find((t) => t.theme_id === getThemeId()) ?? null
 }
 
 async function fetchClassicPoems() {
@@ -130,40 +76,22 @@ async function fetchClassicPoems() {
   }
 }
 
-async function fetchUserPoems() {
-  userLoading.value = true
-  page.value.theme_id = getThemeId()
-  try {
-    const res = await getpoemsall(page.value)
-    userPoems.value = res.data.msg.list ?? []
-    totalCount.value = res.data.msg.pagination.totalCount ?? 0
-  } catch {
-    userPoems.value = []
-  } finally {
-    userLoading.value = false
-  }
-}
-
 function goToPoem(poem_id: number) {
   router.push({ name: 'ArticleIndex', params: { poem_id } })
-}
-
-function formatDate(dateStr: string) {
-  return dateStr ? dateStr.slice(0, 10) : ''
 }
 
 onMounted(async () => {
   await fetchThemeInfo()
   await fetchClassicPoems()
-  await fetchUserPoems()
 })
 
-watch(() => route.params.them_id, async () => {
-  page.value.currentPage4 = 1
-  await fetchThemeInfo()
-  await fetchClassicPoems()
-  await fetchUserPoems()
-})
+watch(
+  () => route.params.them_id,
+  async () => {
+    await fetchThemeInfo()
+    await fetchClassicPoems()
+  }
+)
 </script>
 
 <style lang="less" scoped>

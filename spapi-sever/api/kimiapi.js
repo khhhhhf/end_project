@@ -172,7 +172,7 @@ async function getPoemRelatedResponse(poemContent, userQuestion) {
 
 
 //ai判断是否
-module.exports = {
+module.exports = {  
   generatePoetryPrompt,
   judgeFlyingFlowerWord,
   getPoemRelatedResponse

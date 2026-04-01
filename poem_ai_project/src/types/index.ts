@@ -45,6 +45,7 @@ export interface userinfo {
   token: string
   user_id: number
   username: string
+  role: string
 }
 
 export interface create {

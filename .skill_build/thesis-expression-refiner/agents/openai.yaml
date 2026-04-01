@@ -1,0 +1,4 @@
+interface:
+  display_name: "Thesis Expression Refiner"
+  short_description: "Refine thesis prose into concrete, natural academic writing"
+  default_prompt: "Revise thesis or paper prose that sounds formulaic or overly generic into clearer, more concrete academic writing while preserving facts and citations."

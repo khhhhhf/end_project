@@ -6,11 +6,12 @@ import router from '@/router'
 export const useUserStore = defineStore(
   'user',
   () => {
-    const userinfo = ref({
+    const userinfo = ref<userinfo>({
       avatar_url: '',
       token: '',
       user_id: 0,
-      username: ''
+      username: '',
+      role: ''
     })
     function getinfo(obj: userinfo) {
       userinfo.value = { ...obj }
@@ -21,7 +22,8 @@ export const useUserStore = defineStore(
         avatar_url: '',
         token: '',
         user_id: 0,
-        username: ''
+        username: '',
+        role: ''
       }
       ElMessage.success('退出成功')
     }
